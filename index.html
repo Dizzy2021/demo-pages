@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Photo Repository</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface-alt: #f0f0f3;
+      --border: #e2e2e7;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --danger: #dc2626;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, #eef2ff, #f9fafb 50%, #e5e7eb);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1200px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(16px);
+      padding: 20px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Top Bar */
+
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .app-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .app-title-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .app-title-text h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .app-title-text span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 320px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--surface-alt);
+      border: 1px solid transparent;
+      transition: border 0.15s ease, background 0.15s ease;
+    }
+
+    .search-box:focus-within {
+      border-color: var(--primary-soft);
+      background: #ffffff;
+    }
+
+    .search-box span {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .search-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      flex: 1;
+    }
+
+    /* Action Bar */
+
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .action-left,
+    .action-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 999px;
+      padding: 7px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-alt);
+      color: var(--text-main);
+      transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease, opacity 0.1s ease;
+    }
+
+    button span.icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    button.primary-soft {
+      background: var(--primary-soft);
+      color: #1d4ed8;
+    }
+
+    button.danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    button:not(:disabled):hover {
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .select-info {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0 0;
+    }
+
+    /* Photo Grid */
+
+    .grid-wrapper {
+      flex: 1;
+      background: var(--bg);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .grid-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .grid-header h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .grid-header span {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .grid-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill {
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill select {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 13px;
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .photo-card {
+      position: relative;
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: border 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+    }
+
+    .photo-card:hover {
+      border-color: var(--primary-soft);
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .photo-thumb {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background-size: cover;
+      background-position: center;
+      background-color: #e5e7eb;
+    }
+
+    .photo-meta {
+      padding: 6px 8px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .photo-name {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .photo-description {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .photo-card .select-box {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.25);
+      background: rgba(255, 255, 255, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: var(--primary);
+      backdrop-filter: blur(4px);
+    }
+
+    .photo-card.selected {
+      border-color: var(--primary);
+    }
+
+    .photo-card.selected .select-box {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .photo-menu {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.55);
+      color: #f9fafb;
+      font-size: 16px;
+      padding: 2px 8px 4px;
+      line-height: 1;
+    }
+
+    /* Empty state */
+
+    .empty-state {
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--border);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 40px 20px;
+      text-align: center;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .empty-state.active {
+      display: flex;
+    }
+
+    .empty-state-title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .empty-state-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 360px;
+    }
+
+    .empty-state button {
+      margin-top: 6px;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px;
+      }
+      .app-shell {
+        padding: 14px 14px 16px;
+        border-radius: 18px;
+      }
+      .grid-wrapper {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="app-title">
+        <div class="app-logo">P</div>
+        <div class="app-title-text">
+          <h1>Photo Repository</h1>
+          <span>Upload, capture, and manage your photos</span>
+        </div>
+      </div>
+
+      <label class="search-box">
+        <span>🔍</span>
+        <input type="search" placeholder="Search photos…" />
+      </label>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <div class="action-left">
+        <button class="primary" id="btn-upload">
+          <span class="icon">⬆️</span>
+          <span>Upload</span>
+        </button>
+
+        <button class="primary-soft" id="btn-camera">
+          <span class="icon">📷</span>
+          <span>Take Photo</span>
+        </button>
+
+        <button class="danger" id="btn-delete" disabled>
+          <span class="icon">🗑️</span>
+          <span>Delete Selected</span>
+        </button>
+      </div>
+
+      <div class="action-right">
+        <div class="select-info" id="select-info">0 selected</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Main Grid Wrapper -->
+    <div class="grid-wrapper">
+      <div class="grid-header">
+        <div>
+          <h2>All Photos</h2>
+          <span>Recently added • Sorted by newest first</span>
+        </div>
+        <div class="grid-controls">
+          <div class="pill">
+            View:
+            <select>
+              <option>Grid</option>
+              <option>List</option>
+            </select>
+          </div>
+          <div class="pill">
+            Sort:
+            <select>
+              <option>Newest first</option>
+              <option>Oldest first</option>
+              <option>Name (A–Z)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State (show this when no photos) -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-state-title">No photos yet</div>
+        <div class="empty-state-text">
+          Get started by uploading images from your device or taking a new photo with your camera.
+        </div>
+        <button class="primary" id="empty-upload">
+          <span class="icon">⬆️</span>
+          <span>Upload from device</span>
+        </button>
+      </div>
+
+      <!-- Photo Grid -->
+      <div class="photo-grid" id="photo-grid">
+        <!-- Example cards – replace with dynamic content -->
+        <div class="photo-card" data-id="1">
+          <div class="photo-thumb" style="background-image: url('https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg?auto=compress&cs=tinysrgb&w=600');"></div>
+          <div class="photo-meta">
+            <div class="photo-name">Sunset Beach.jpg</div>
+            <div class="photo-description">Today • 2.3 MB</div>
+          </div>
+          <div class="select-box">✓</div>
+          <div class="photo-menu">⋯</div>
+        </div>
+
+        <div class="photo-card" data-id="2">
+          <div class="photo-thumb" style="background-image: url('https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=600');"></div>
+          <div class="photo-meta">
+            <div class="photo-name">City Lights.png</div>
+            <div class="photo-description">Yesterday • 1.1 MB</div>
+          </div>
+          <div class="select-box">✓</div>
+          <div class="photo-menu">⋯</div>
+        </div>
+
+        <div class="photo-card" data-id="3">
+          <div class="photo-thumb" style="background-image: url('https://images.pexels.com/photos/34950/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=600');"></div>
+          <div class="photo-meta">
+            <div class="photo-name">Forest Walk.jpeg</div>
+            <div class="photo-description">2 days ago • 3.8 MB</div>
+          </div>
+          <div class="select-box">✓</div>
+          <div class="photo-menu">⋯</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden file input for uploads -->
+    <input
+      type="file"
+      id="file-input"
+      accept="image/*"
+      multiple
+      style="display: none"
+    />
+  </div>
+
+  <script>
+    // Simple interactivity to demonstrate the UI behavior
+
+    const photoGrid = document.getElementById("photo-grid");
+    const deleteButton = document.getElementById("btn-delete");
+    const selectInfo = document.getElementById("select-info");
+    const fileInput = document.getElementById("file-input");
+    const uploadButtons = [
+      document.getElementById("btn-upload"),
+      document.getElementById("empty-upload"),
+    ].filter(Boolean);
+    const emptyState = document.getElementById("empty-state");
+
+    function updateSelectionInfo() {
+      const selected = photoGrid.querySelectorAll(".photo-card.selected").length;
+      selectInfo.textContent = `${selected} selected`;
+      deleteButton.disabled = selected === 0;
+    }
+
+    function refreshEmptyState() {
+      const cards = photoGrid.querySelectorAll(".photo-card").length;
+      if (cards === 0) {
+        emptyState.classList.add("active");
+      } else {
+        emptyState.classList.remove("active");
+      }
+    }
+
+    // Toggle selection on card click
+    photoGrid.addEventListener("click", (e) => {
+      const card = e.target.closest(".photo-card");
+      if (!card) return;
+      card.classList.toggle("selected");
+      updateSelectionInfo();
+    });
+
+    // Trigger file upload
+    uploadButtons.forEach((btn) => {
+      if (!btn) return;
+      btn.addEventListener("click", () => fileInput.click());
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      // Here you would handle uploaded files & push them to your backend.
+      // For now, just log them.
+      console.log("Selected files:", Array.from(e.target.files));
+    });
+
+    // Delete selected (demo: just remove DOM nodes)
+    deleteButton.addEventListener("click", () => {
+      const selected = photoGrid.querySelectorAll(".photo-card.selected");
+      selected.forEach((card) => card.remove());
+      updateSelectionInfo();
+      refreshEmptyState();
+    });
+
+    // Camera button placeholder
+    document.getElementById("btn-camera").addEventListener("click", () => {
+      // In a real app, you might open a camera modal or route to a capture screen
+      alert("Open camera / capture UI here.");
+    });
+
+    // Initialize
+    updateSelectionInfo();
+    refreshEmptyState();
+  </script>
+
+  <ul>
+    <li><a href="Pages/email-template.html" target="_blank">Emails page link</a></li>
+    <li><a href="Pages/Notes.html" target="_blank">Notes Section Link</a></li>
+  </ul>
+</body>
+</html>
